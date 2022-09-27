@@ -1,0 +1,209 @@
+openapi: "3.0.0"
+info:
+  version: 0.0.1-SNAPSHOT
+  title: Swagger Nab API
+  license:
+    name: MIT
+paths:
+  /products:
+    get:
+      summary: get products
+      parameters:
+        - name: category
+          in : query
+          required: false
+          schema:
+            type: string
+          description: filter by category name
+          example: "Best seller"
+        - name: priceMin
+          in: query
+          required: false
+          schema:
+            type: string
+          description: filter by min price
+          example: "1000"
+        - name: priceMax
+          in: query
+          required: false
+          schema:
+            type: string
+          description: filter by max price
+          example: "5000"
+        - name: brand
+          in: query
+          required: false
+          schema:
+            type: string
+          description: filter by brand name
+          example: "Suzuki"
+        - name: color
+          in: query
+          required: false
+          schema:
+            type: string
+          description: filter by color
+          example: "Blue"
+      responses:
+        '200':
+          description: OK
+          content:
+            applications/json:
+              schema:
+                $ref: "#/components/schemas/ProductSearchResult"
+
+  /products/{product-id}:
+    get:
+      summary: get product details of a given product
+      parameters:
+        - name: product-id
+          in: path
+          description: product ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductDetail"
+
+  /customers/{customer-id}/cart:
+    get:
+      summary: get current cart for customer
+      parameters:
+        - name: customer-id
+          in: path
+          description: customer ID
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CartInfo"
+
+  /customers/{customer-id}/cart/items:
+    post:
+      summary: add item to cart
+      parameters:
+        - name: customer-id
+          in: path
+          description: customer ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddToCartRequestBody"
+      responses:
+        '200':
+          description: OK
+
+components:
+  schemas:
+    ProductSearchResult:
+      type: object
+      properties:
+        total-items:
+          type: integer
+          description: Total item found
+        total-pages:
+          type: integer
+          description: Total pages
+        current-page:
+          type: integer
+          description: Index of the current page
+        products:
+          $ref: "#/components/schemas/ProductList"
+    ProductList:
+        type: array
+        items:
+          $ref: "#/components/schemas/ProductListItem"
+    ProductListItem:
+      type: object
+      properties:
+        id:
+          type: string
+          description: unique id (UUID)
+        name:
+          type: string
+          description: item name
+
+    ProductDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          description: unique id (UUID)
+        name:
+          type: string
+          description: item name
+        description:
+          type: string
+          description: item description
+        icon-url:
+          type: string
+          description: item icon URL
+        price:
+          type: string
+          description: item price
+        discount:
+          type: string
+          description: item discount, promotions
+
+    CartInfo:
+      type: object
+      properties:
+        amount-original:
+          type: number
+          description: total amount before discount
+        amount-discount:
+          type: number
+          description: discount amount
+        amount-tax:
+          type: number
+          description: tax amount
+        amount-saving:
+          type: number
+          description: saving amount
+        amount-final:
+          type: number
+          description: final amount with tax and discount calculated
+        items:
+          $ref: "#/components/schemas/CartInfoResponseItems"
+    CartInfoResponseItems:
+      type: array
+      items:
+        $ref: "#/components/schemas/CartInfoResponseItem"
+    CartInfoResponseItem:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Item ID
+        name:
+          type: string
+          description: Item name in selected locale
+        price-original:
+          type: number
+          description: item price before discount
+        price-actual:
+          type: number
+          description: item price after discount
+        amount-tax:
+          type: number
+          description: item tax amount
+
+    AddToCartRequestBody:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Item ID
